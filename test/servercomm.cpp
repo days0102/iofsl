@@ -275,8 +275,8 @@ int main (int argc, char ** args)
 
 
       // Defined here so the server keeps running until the client is done.
-      shared_ptr<iofwd::RPCServer> rpcserver;
-      shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
+      boost::shared_ptr<iofwd::RPCServer> rpcserver;
+      boost::shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
       // net::Net * net = netservice->getNet ();
       net::ConstCommunicatorHandle c = netservice->getServerComm ();
       const size_t myrank = c->rank ();
@@ -297,7 +297,7 @@ int main (int argc, char ** args)
             boost::bind (&threadRPC, tmp, _1, _2, _3));
 
 
-      shared_ptr<iofwd::RPCClient> rpcclient
+      boost::shared_ptr<iofwd::RPCClient> rpcclient
          (man.loadService<iofwd::RPCClient>("rpcclient"));
 
 

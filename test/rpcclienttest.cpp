@@ -94,7 +94,7 @@ int main (int argc, char ** args)
       if (!opt_remote.empty())
       {
          //net::loopback::LoopbackConnector netservice;
-         shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
+         boost::shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
          SingleCompletion block;
          net::Net * net = netservice->getNet ();
          net::AddressPtr addr;
@@ -116,7 +116,7 @@ int main (int argc, char ** args)
              size_t mem_sizes[_N]; 
              size_t _foff = 0; 
              size_t mem_count, file_count; 
-             uint64_t file_sizes[_N], file_starts[_N]; 
+             std::uint64_t file_sizes[_N], file_starts[_N]; 
              void *mem_starts_write[_N]; 
              size_t _i = 0; 
              mem_count = _N; 

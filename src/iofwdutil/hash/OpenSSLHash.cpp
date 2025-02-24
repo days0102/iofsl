@@ -26,7 +26,7 @@ namespace iofwdutil
          {
             ZTHROW (NoSuchHashException () << hash_name (name));
          }
-         EVP_MD_CTX_init(&mdctx_);
+         EVP_MD_CTX_init(mdctx_);
 
          reset();
       }
@@ -34,15 +34,16 @@ namespace iofwdutil
       OpenSSLHash::~OpenSSLHash ()
       {
          // destructors should never throw. Just log error
-         if (EVP_MD_CTX_cleanup(&mdctx_) != 1)
-         {
-            //ZLOG_ERROR("Error in OpenSSLHash destructor!");
-         }
+         // if (EVP_MD_CTX_cleanup(&mdctx_) != 1)
+         // {
+         //    //ZLOG_ERROR("Error in OpenSSLHash destructor!");
+         // }
+         EVP_MD_CTX_destroy(mdctx_);
       }
 
       void OpenSSLHash::reset ()
       {
-         check(EVP_DigestInit_ex(&mdctx_, md_, 0));
+         check(EVP_DigestInit_ex(mdctx_, md_, 0));
       }
 
       std::string OpenSSLHash::getName () const
@@ -52,17 +53,17 @@ namespace iofwdutil
 
       size_t OpenSSLHash::getHash (void * dest, size_t bufsize, bool finalize)
       {
-         EVP_MD_CTX copy;
+         EVP_MD_CTX *copy;
          EVP_MD_CTX * ctx;
          if (finalize)
          {
-            ctx = &mdctx_;
+            ctx = mdctx_;
          }
          else
          {
-            EVP_MD_CTX_init (&copy);
-            check(EVP_MD_CTX_copy_ex (&copy, &mdctx_));
-            ctx = &copy;
+            EVP_MD_CTX_init (copy);
+            check(EVP_MD_CTX_copy_ex (copy, mdctx_));
+            ctx = copy;
          }
       
          unsigned int size = bufsize;
@@ -78,7 +79,7 @@ namespace iofwdutil
 
       void OpenSSLHash::process (const void * d, size_t bytes)
       {
-         check (EVP_DigestUpdate (&mdctx_, d, bytes));
+         check (EVP_DigestUpdate (mdctx_, d, bytes));
       }
 
       // ------------- registration stuff -----------------------------------

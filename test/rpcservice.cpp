@@ -310,7 +310,7 @@ int main (int argc, char ** args)
 
 
       // Defined here so the server keeps running until the client is done.
-      shared_ptr<iofwd::RPCServer> rpcserver;
+      boost::shared_ptr<iofwd::RPCServer> rpcserver;
 
       if (opt_server)
       {
@@ -332,8 +332,8 @@ int main (int argc, char ** args)
 
       if (!opt_remote.empty())
       {
-         shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
-         shared_ptr<iofwd::RPCClient> rpcclient
+         boost::shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
+         boost::shared_ptr<iofwd::RPCClient> rpcclient
             (man.loadService<iofwd::RPCClient>("rpcclient"));
 
          // Lookup RPC destination

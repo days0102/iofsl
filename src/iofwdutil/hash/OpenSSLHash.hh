@@ -1,3 +1,11 @@
+/*
+ * @Author: Outsider
+ * @Date: 2025-02-18 15:45:32
+ * @LastEditors: Outsider
+ * @LastEditTime: 2025-02-18 15:51:19
+ * @Description: In User Settings Edit
+ * @FilePath: /iofsl/src/iofwdutil/hash/OpenSSLHash.hh
+ */
 #ifndef IOFWDUTIL_HASH_OPENSSLHASH_HH
 #define IOFWDUTIL_HASH_OPENSSLHASH_HH
 
@@ -47,7 +55,7 @@ namespace iofwdutil
          void error (int ret);
 
       protected:
-         EVP_MD_CTX mdctx_;
+         EVP_MD_CTX *mdctx_;
          const EVP_MD *md_;
 
          const char * const name_;

@@ -135,17 +135,17 @@ public:
          // of ':'. When calling addEntry the name is still there.
          // Therefore, added a epsilon transition which is called when no
          // valid string + ':' is found. The epsilon action clears the name.
-         entry_ = ( 
-                    (( (+chset_p("A-Z_\\-a-z0-9.*") )
-                       [
-                       bind(&LevelStrParser::setName2)(entry_.name,
-                          arg1, arg2)
-                       ] >> ':' ) 
-                      | eps_p[bind(&LevelStrParser::clearName)(entry_.name,arg1,arg2)]
-                     )
-                      >> level_p[entry_.level = ourphoenix::arg1]
-                 )[bind(&LevelStrParser::addEntry)(self, entry_.level, entry_.name)]
-               ; 
+         // entry_ = ( 
+         //            (( (+chset_p("A-Z_\\-a-z0-9.*") )
+         //               [
+         //               bind(&LevelStrParser::setName2)(entry_.name,
+         //                  arg1, arg2)
+         //               ] >> ':' ) 
+         //              | eps_p[bind(&LevelStrParser::clearName)(entry_.name,arg1,arg2)]
+         //             )
+         //              >> level_p[entry_.level = ourphoenix::arg1]
+         //         )[bind(&LevelStrParser::addEntry)(self, entry_.level, entry_.name)]
+         //       ; 
 
          start_ = !entry_ >> *( ',' >>  entry_); 
       }

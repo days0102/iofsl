@@ -73,13 +73,13 @@ public:
       return size_;
    }
 
-   size_t getPos () const
+   size_t getPos ()
    {
       return xdr_getpos (&xdr_);
    }
 
 public:
-   struct ::XDR xdr_;
+   ::XDR xdr_;
 
    void check (int t)
    {

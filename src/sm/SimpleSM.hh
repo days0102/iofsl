@@ -38,7 +38,7 @@ namespace sm
       { yield_ = true; }
 
    public:
-      SimpleSM (SMManager & smm, bool poll);
+      SimpleSM (SMManager & smm, bool poll = false);
 
       virtual ~SimpleSM ();
 
@@ -120,7 +120,7 @@ namespace sm
 //===========================================================================
 
 template <typename T>
-SimpleSM<T>::SimpleSM (SMManager & m, bool poll = false)
+SimpleSM<T>::SimpleSM (SMManager & m, bool poll)
   : smm_(m), next_(0), yield_(false),
    running_(false), poll_(poll)
 {

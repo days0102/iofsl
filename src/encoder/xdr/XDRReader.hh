@@ -46,7 +46,7 @@ public:
       /**
        * Return how many bytes have been written to the buffer.
        */
-      size_t getPos () const
+      size_t getPos ()
       { return XDRBase::getPos(); }
 
       /**

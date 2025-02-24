@@ -1,0 +1,272 @@
+diff --git a/src/encoder/xdr/XDRBase.hh b/src/encoder/xdr/XDRBase.hh
+index 72591710..13a7d03a 100644
+--- a/src/encoder/xdr/XDRBase.hh
++++ b/src/encoder/xdr/XDRBase.hh
+@@ -73,13 +73,13 @@ public:
+       return size_;
+    }
+ 
+-   size_t getPos () const
++   size_t getPos ()
+    {
+       return xdr_getpos (&xdr_);
+    }
+ 
+ public:
+-   struct ::XDR xdr_;
++   ::XDR xdr_;
+ 
+    void check (int t)
+    {
+diff --git a/src/encoder/xdr/XDRReader.hh b/src/encoder/xdr/XDRReader.hh
+index 26b1d2d1..aab5d684 100644
+--- a/src/encoder/xdr/XDRReader.hh
++++ b/src/encoder/xdr/XDRReader.hh
+@@ -46,7 +46,7 @@ public:
+       /**
+        * Return how many bytes have been written to the buffer.
+        */
+-      size_t getPos () const
++      size_t getPos ()
+       { return XDRBase::getPos(); }
+ 
+       /**
+diff --git a/src/encoder/xdr/XDRWriter.hh b/src/encoder/xdr/XDRWriter.hh
+index 1160f975..e51389d6 100644
+--- a/src/encoder/xdr/XDRWriter.hh
++++ b/src/encoder/xdr/XDRWriter.hh
+@@ -30,7 +30,7 @@ public:
+    }
+ 
+    /* Return actual encoded data size */
+-   size_t size () const
++   size_t size ()
+    {
+       return getPos ();
+    }
+@@ -58,7 +58,7 @@ public:
+       /**
+        * Return how many bytes have been written to the buffer.
+        */
+-      size_t getPos () const
++      size_t getPos ()
+       { return XDRBase::getPos(); }
+ 
+       /**
+diff --git a/src/iofwdutil/IOFWDLog.cpp b/src/iofwdutil/IOFWDLog.cpp
+index 5fb69c4c..f7394b27 100644
+--- a/src/iofwdutil/IOFWDLog.cpp
++++ b/src/iofwdutil/IOFWDLog.cpp
+@@ -135,17 +135,17 @@ public:
+          // of ':'. When calling addEntry the name is still there.
+          // Therefore, added a epsilon transition which is called when no
+          // valid string + ':' is found. The epsilon action clears the name.
+-         entry_ = ( 
+-                    (( (+chset_p("A-Z_\\-a-z0-9.*") )
+-                       [
+-                       bind(&LevelStrParser::setName2)(entry_.name,
+-                          arg1, arg2)
+-                       ] >> ':' ) 
+-                      | eps_p[bind(&LevelStrParser::clearName)(entry_.name,arg1,arg2)]
+-                     )
+-                      >> level_p[entry_.level = ourphoenix::arg1]
+-                 )[bind(&LevelStrParser::addEntry)(self, entry_.level, entry_.name)]
+-               ; 
++         // entry_ = ( 
++         //            (( (+chset_p("A-Z_\\-a-z0-9.*") )
++         //               [
++         //               bind(&LevelStrParser::setName2)(entry_.name,
++         //                  arg1, arg2)
++         //               ] >> ':' ) 
++         //              | eps_p[bind(&LevelStrParser::clearName)(entry_.name,arg1,arg2)]
++         //             )
++         //              >> level_p[entry_.level = ourphoenix::arg1]
++         //         )[bind(&LevelStrParser::addEntry)(self, entry_.level, entry_.name)]
++         //       ; 
+ 
+          start_ = !entry_ >> *( ',' >>  entry_); 
+       }
+diff --git a/src/iofwdutil/hash/OpenSSLHash.cpp b/src/iofwdutil/hash/OpenSSLHash.cpp
+index b9792d90..5b531acb 100644
+--- a/src/iofwdutil/hash/OpenSSLHash.cpp
++++ b/src/iofwdutil/hash/OpenSSLHash.cpp
+@@ -26,7 +26,7 @@ namespace iofwdutil
+          {
+             ZTHROW (NoSuchHashException () << hash_name (name));
+          }
+-         EVP_MD_CTX_init(&mdctx_);
++         EVP_MD_CTX_init(mdctx_);
+ 
+          reset();
+       }
+@@ -34,15 +34,16 @@ namespace iofwdutil
+       OpenSSLHash::~OpenSSLHash ()
+       {
+          // destructors should never throw. Just log error
+-         if (EVP_MD_CTX_cleanup(&mdctx_) != 1)
+-         {
+-            //ZLOG_ERROR("Error in OpenSSLHash destructor!");
+-         }
++         // if (EVP_MD_CTX_cleanup(&mdctx_) != 1)
++         // {
++         //    //ZLOG_ERROR("Error in OpenSSLHash destructor!");
++         // }
++         EVP_MD_CTX_destroy(mdctx_);
+       }
+ 
+       void OpenSSLHash::reset ()
+       {
+-         check(EVP_DigestInit_ex(&mdctx_, md_, 0));
++         check(EVP_DigestInit_ex(mdctx_, md_, 0));
+       }
+ 
+       std::string OpenSSLHash::getName () const
+@@ -52,17 +53,17 @@ namespace iofwdutil
+ 
+       size_t OpenSSLHash::getHash (void * dest, size_t bufsize, bool finalize)
+       {
+-         EVP_MD_CTX copy;
++         EVP_MD_CTX *copy;
+          EVP_MD_CTX * ctx;
+          if (finalize)
+          {
+-            ctx = &mdctx_;
++            ctx = mdctx_;
+          }
+          else
+          {
+-            EVP_MD_CTX_init (&copy);
+-            check(EVP_MD_CTX_copy_ex (&copy, &mdctx_));
+-            ctx = &copy;
++            EVP_MD_CTX_init (copy);
++            check(EVP_MD_CTX_copy_ex (copy, mdctx_));
++            ctx = copy;
+          }
+       
+          unsigned int size = bufsize;
+@@ -78,7 +79,7 @@ namespace iofwdutil
+ 
+       void OpenSSLHash::process (const void * d, size_t bytes)
+       {
+-         check (EVP_DigestUpdate (&mdctx_, d, bytes));
++         check (EVP_DigestUpdate (mdctx_, d, bytes));
+       }
+ 
+       // ------------- registration stuff -----------------------------------
+diff --git a/src/iofwdutil/hash/OpenSSLHash.hh b/src/iofwdutil/hash/OpenSSLHash.hh
+index 32384c94..4c445e94 100644
+--- a/src/iofwdutil/hash/OpenSSLHash.hh
++++ b/src/iofwdutil/hash/OpenSSLHash.hh
+@@ -1,3 +1,11 @@
++/*
++ * @Author: Outsider
++ * @Date: 2025-02-18 15:45:32
++ * @LastEditors: Outsider
++ * @LastEditTime: 2025-02-18 15:51:19
++ * @Description: In User Settings Edit
++ * @FilePath: /iofsl/src/iofwdutil/hash/OpenSSLHash.hh
++ */
+ #ifndef IOFWDUTIL_HASH_OPENSSLHASH_HH
+ #define IOFWDUTIL_HASH_OPENSSLHASH_HH
+ 
+@@ -47,7 +55,7 @@ namespace iofwdutil
+          void error (int ret);
+ 
+       protected:
+-         EVP_MD_CTX mdctx_;
++         EVP_MD_CTX *mdctx_;
+          const EVP_MD *md_;
+ 
+          const char * const name_;
+diff --git a/src/sm/SimpleSM.hh b/src/sm/SimpleSM.hh
+index f48132ce..af70d7a7 100644
+--- a/src/sm/SimpleSM.hh
++++ b/src/sm/SimpleSM.hh
+@@ -38,7 +38,7 @@ namespace sm
+       { yield_ = true; }
+ 
+    public:
+-      SimpleSM (SMManager & smm, bool poll);
++      SimpleSM (SMManager & smm, bool poll = false);
+ 
+       virtual ~SimpleSM ();
+ 
+@@ -120,7 +120,7 @@ namespace sm
+ //===========================================================================
+ 
+ template <typename T>
+-SimpleSM<T>::SimpleSM (SMManager & m, bool poll = false)
++SimpleSM<T>::SimpleSM (SMManager & m, bool poll)
+   : smm_(m), next_(0), yield_(false),
+    running_(false), poll_(poll)
+ {
+diff --git a/test/rpcclienttest.cpp b/test/rpcclienttest.cpp
+index d0f128e8..1d0a11ab 100644
+--- a/test/rpcclienttest.cpp
++++ b/test/rpcclienttest.cpp
+@@ -94,7 +94,7 @@ int main (int argc, char ** args)
+       if (!opt_remote.empty())
+       {
+          //net::loopback::LoopbackConnector netservice;
+-         shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
++         boost::shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
+          SingleCompletion block;
+          net::Net * net = netservice->getNet ();
+          net::AddressPtr addr;
+@@ -116,7 +116,7 @@ int main (int argc, char ** args)
+              size_t mem_sizes[_N]; 
+              size_t _foff = 0; 
+              size_t mem_count, file_count; 
+-             uint64_t file_sizes[_N], file_starts[_N]; 
++             std::uint64_t file_sizes[_N], file_starts[_N]; 
+              void *mem_starts_write[_N]; 
+              size_t _i = 0; 
+              mem_count = _N; 
+diff --git a/test/rpcservice.cpp b/test/rpcservice.cpp
+index 8cd1fcea..7903fd24 100644
+--- a/test/rpcservice.cpp
++++ b/test/rpcservice.cpp
+@@ -310,7 +310,7 @@ int main (int argc, char ** args)
+ 
+ 
+       // Defined here so the server keeps running until the client is done.
+-      shared_ptr<iofwd::RPCServer> rpcserver;
++      boost::shared_ptr<iofwd::RPCServer> rpcserver;
+ 
+       if (opt_server)
+       {
+@@ -332,8 +332,8 @@ int main (int argc, char ** args)
+ 
+       if (!opt_remote.empty())
+       {
+-         shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
+-         shared_ptr<iofwd::RPCClient> rpcclient
++         boost::shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
++         boost::shared_ptr<iofwd::RPCClient> rpcclient
+             (man.loadService<iofwd::RPCClient>("rpcclient"));
+ 
+          // Lookup RPC destination
+diff --git a/test/servercomm.cpp b/test/servercomm.cpp
+index 867bec90..b40a6f25 100644
+--- a/test/servercomm.cpp
++++ b/test/servercomm.cpp
+@@ -275,8 +275,8 @@ int main (int argc, char ** args)
+ 
+ 
+       // Defined here so the server keeps running until the client is done.
+-      shared_ptr<iofwd::RPCServer> rpcserver;
+-      shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
++      boost::shared_ptr<iofwd::RPCServer> rpcserver;
++      boost::shared_ptr<iofwd::Net> netservice (man.loadService<iofwd::Net>("net"));
+       // net::Net * net = netservice->getNet ();
+       net::ConstCommunicatorHandle c = netservice->getServerComm ();
+       const size_t myrank = c->rank ();
+@@ -297,7 +297,7 @@ int main (int argc, char ** args)
+             boost::bind (&threadRPC, tmp, _1, _2, _3));
+ 
+ 
+-      shared_ptr<iofwd::RPCClient> rpcclient
++      boost::shared_ptr<iofwd::RPCClient> rpcclient
+          (man.loadService<iofwd::RPCClient>("rpcclient"));
+ 
+ 

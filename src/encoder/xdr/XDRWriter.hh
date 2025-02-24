@@ -30,7 +30,7 @@ public:
    }
 
    /* Return actual encoded data size */
-   size_t size () const
+   size_t size ()
    {
       return getPos ();
    }
@@ -58,7 +58,7 @@ public:
       /**
        * Return how many bytes have been written to the buffer.
        */
-      size_t getPos () const
+      size_t getPos ()
       { return XDRBase::getPos(); }
 
       /**
