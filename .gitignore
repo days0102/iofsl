@@ -130,6 +130,7 @@ stamp-h1
 *.trs
 
 compile_commands.json
+configure~
 test/net
 test/hashfunc
 test/rpcservice
@@ -138,3 +139,4 @@ test/servercomm
 test/streamclienttest
 test/transform
 test/zoidfsfuse
+src/fuse/zoidfsfuse
